@@ -513,6 +513,17 @@ function metaname_GetDNS( $params )
   #$metaname->inspect( 'metaname_GetDNS', $params );
   try {
     $records = $metaname->dns_zone( $metaname->specified_domain_name() );
+    # Convert the RRs from Metaname form to WHMCS form
+    for ( $i = 0;  $i < count($records);  $i += 1 )
+    {
+      $record = $records[$i];
+      $records[$i] = array(
+        'hostname' => $record->name,
+        'type' =>     $record->type,
+        'address' =>  $record->data
+      );
+    }
+    return $records;
   }
   catch ( JsonRpcFault $e )
   {
@@ -525,7 +536,21 @@ function metaname_SaveDNS( $params )
   $metaname = new Metaname( $params );
   $metaname->inspect( 'metaname_SaveDNS', $params );
   try {
-    return array( 'error' => 'Not implemented' );
+    $records = array();
+    # Convert $records from WHMCS form to Metaname form
+    foreach ($params['dnsrecords'] as $key => $record )
+    {
+      $metaname->inspect( 'rc', $record );
+      $records[] = array(
+        'name' => $record['hostname'],
+        'type' => $record['type'],
+        'aux' => ('MX' == $record['type'] ? 0 : NULL ),
+        'ttl' => 3600,
+        'data' => $record['address']
+      );
+    }
+    $metaname->configure_zone( $metaname->specified_domain_name(), $records, NULL );
+    return NULL;
   }
   catch ( JsonRpcFault $e )
   {
