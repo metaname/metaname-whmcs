@@ -136,7 +136,7 @@ EOF;
     # Try to detect the area code
     $fullphonenumber = trim( $params[$prefix.'fullphonenumber'] );
     $matches = array();
-    if ( preg_match('/\+(\d+)\.(.+)', $fullphonenumber, $matches) )
+    if ( preg_match('/\+(\d+)\.(.+)/', $fullphonenumber, $matches) )
     {
       $country_code =    $matches[1];
       $national_number = $matches[2];
